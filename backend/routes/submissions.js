@@ -207,13 +207,24 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     console.warn('[Submissions API] Database unavailable during submission, saving to memory store:', error.message);
+    const studentNames = {
+      3: { name: 'Alex Mercer', email: 'student.mercer@university.edu' },
+      4: { name: 'Maya Lin', email: 'student.lin@university.edu' },
+      5: { name: 'Jordan Lee', email: 'student.lee@university.edu' },
+    };
+    const sInfo = studentNames[Number(student_id)] || { name: 'Alex Mercer', email: 'student.mercer@university.edu' };
+    const aTitles = {
+      1: 'Lab 1: AWS VPC & Multi-Tier Architecture Design',
+      2: 'Lab 2: Serverless Event-Driven Pipeline using S3 & Lambda',
+      3: 'Lab 3: Kubernetes Microservices Deployment on AWS EKS',
+    };
     const newSub = {
       id: inMemorySubmissions.length + 1,
       assignment_id: Number(assignment_id),
       student_id: Number(student_id),
-      student_name: 'Active Student',
-      student_email: 'student@university.edu',
-      assignment_title: `Assignment #${assignment_id}`,
+      student_name: sInfo.name,
+      student_email: sInfo.email,
+      assignment_title: aTitles[Number(assignment_id)] || `Assignment #${assignment_id}`,
       assignment_due_date: new Date(Date.now() + 7 * 86400000).toISOString(),
       file_url,
       file_key,

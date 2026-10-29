@@ -11,7 +11,12 @@ import {
   Search,
   BookOpen,
   RefreshCw,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Sparkles,
+  ArrowUpRight,
+  TrendingUp,
+  Cloud
 } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import SubmitModal from './SubmitModal';
@@ -54,7 +59,6 @@ export default function StudentDashboard({ student }) {
   const submissionsMap = React.useMemo(() => {
     const map = {};
     submissions.forEach((sub) => {
-      // If student has multiple submissions for an assignment, keep the latest
       if (!map[sub.assignment_id] || new Date(sub.submitted_at) > new Date(map[sub.assignment_id].submitted_at)) {
         map[sub.assignment_id] = sub;
       }
@@ -85,13 +89,13 @@ export default function StudentDashboard({ student }) {
   const totalSubmitted = Object.keys(submissionsMap).length;
   const totalGraded = Object.values(submissionsMap).filter((s) => s.status === 'evaluated').length;
   const totalPending = totalTasks - totalSubmitted;
+  const progressPercent = totalTasks > 0 ? Math.round((totalSubmitted / totalTasks) * 100) : 0;
 
   // Filtered Assignments
   const filteredAssignments = assignments.filter((item) => {
     const submission = submissionsMap[item.id];
     const isCompleted = submission && (submission.status === 'evaluated' || submission.status === 'submitted');
 
-    // Search query filter
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -103,289 +107,303 @@ export default function StudentDashboard({ student }) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       
-      {/* Welcome & Profile Summary Bar */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              Student Workspace
+      {/* Hero Banner with Modern Gradient Glow */}
+      <div className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 border border-slate-800 shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 -mb-20 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Student Learning Terminal</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-white tracking-tight">
+              Welcome back, <span className="text-gradient-cyan">{student?.name || 'Alex Mercer'}</span>
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-              {student?.name || 'Active Student'}
-            </span>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Submit your cloud architecture reports directly to <span className="text-slate-200 font-medium">Amazon S3</span> via pre-signed URLs, track instant validation, and inspect comprehensive faculty grading feedback.
+            </p>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Review assignment requirements, upload submissions to AWS S3, and track faculty feedback.
-          </p>
-        </div>
 
-        <button
-          onClick={loadData}
-          disabled={isLoading}
-          className="self-start md:self-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
-        </button>
-      </div>
+          {/* Quick Progress Indicator & Refresh */}
+          <div className="flex items-center gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800/80">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between gap-4 text-xs">
+                <span className="text-slate-400 font-medium">Semester Progress</span>
+                <span className="text-cyan-400 font-bold font-mono">{progressPercent}%</span>
+              </div>
+              <div className="w-36 h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <p className="text-[11px] text-slate-500">{totalSubmitted} of {totalTasks} labs completed</p>
+            </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Total Assigned</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{totalTasks}</p>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Submitted</p>
-          <p className="text-2xl font-bold text-sky-600 mt-1">{totalSubmitted}</p>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Graded</p>
-          <p className="text-2xl font-bold text-emerald-600 mt-1">{totalGraded}</p>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Pending Action</p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">{totalPending}</p>
+            <button
+              onClick={loadData}
+              disabled={isLoading}
+              className="p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700 transition-all cursor-pointer"
+              title="Refresh assignments & submissions"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-cyan-400' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Search & Tabs Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        {/* Search */}
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search assignments..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white"
-          />
+      {/* Metrics Row with Luminous Icons */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800/80 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400">Total Coursework</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center">
+              <BookOpen className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-3xl font-heading font-extrabold text-white tracking-tight">{totalTasks}</p>
+          <p className="text-[11px] text-slate-500">Scheduled for this term</p>
         </div>
 
-        {/* Tab Pills */}
-        <div className="flex items-center gap-1 w-full sm:w-auto bg-slate-100 p-1 rounded-lg">
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800/80 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400">Uploaded to S3</span>
+            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center">
+              <UploadCloud className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-3xl font-heading font-extrabold text-cyan-400 tracking-tight">{totalSubmitted}</p>
+          <p className="text-[11px] text-slate-500">Cryptographically signed</p>
+        </div>
+
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800/80 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400">Evaluated & Graded</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+              <Award className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-3xl font-heading font-extrabold text-emerald-400 tracking-tight">{totalGraded}</p>
+          <p className="text-[11px] text-slate-500">Feedback available</p>
+        </div>
+
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800/80 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400">Pending Action</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-3xl font-heading font-extrabold text-amber-400 tracking-tight">{totalPending}</p>
+          <p className="text-[11px] text-slate-500">Awaiting your submission</p>
+        </div>
+
+      </div>
+
+      {/* Filter Tabs & Search Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass-panel p-2.5 rounded-2xl border border-slate-800">
+        
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 w-full sm:w-auto p-1 bg-slate-900/90 rounded-xl border border-slate-800">
           <button
-            type="button"
             onClick={() => setActiveFilter('all')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-              activeFilter === 'all'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              activeFilter === 'all' 
+                ? 'bg-slate-800 text-white shadow-sm' 
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            All ({totalTasks})
+            All Coursework ({totalTasks})
           </button>
           <button
-            type="button"
             onClick={() => setActiveFilter('to_submit')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-              activeFilter === 'to_submit'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              activeFilter === 'to_submit' 
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             To Submit ({totalPending})
           </button>
           <button
-            type="button"
             onClick={() => setActiveFilter('completed')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-              activeFilter === 'completed'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              activeFilter === 'completed' 
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Completed ({totalSubmitted})
+            Submitted ({totalSubmitted})
           </button>
         </div>
+
+        {/* Search Input */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search assignments..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full glass-input text-xs rounded-xl pl-9 pr-4 py-2 placeholder-slate-500"
+          />
+        </div>
+
       </div>
 
-      {/* Assignments List */}
-      {isLoading ? (
-        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
-          <div className="w-8 h-8 border-2 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs text-slate-500 font-medium">Fetching assignments and submission statuses...</p>
-        </div>
-      ) : filteredAssignments.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
-          <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-          <h3 className="text-sm font-semibold text-slate-800">No assignments found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            {searchQuery ? 'Try adjusting your search terms.' : 'No assignments are currently categorized under this view.'}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-5">
-          {filteredAssignments.map((assignment) => {
+      {/* Assignment Cards List */}
+      <div className="space-y-4">
+        {isLoading ? (
+          <div className="py-16 text-center space-y-3 glass-panel rounded-3xl border border-slate-800">
+            <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
+            <p className="text-sm text-slate-400">Loading assignments & submissions from AWS backend...</p>
+          </div>
+        ) : filteredAssignments.length === 0 ? (
+          <div className="py-16 text-center space-y-3 glass-panel rounded-3xl border border-slate-800">
+            <BookOpen className="w-10 h-10 text-slate-600 mx-auto" />
+            <h3 className="text-base font-semibold text-slate-300">No assignments found</h3>
+            <p className="text-xs text-slate-500">Try adjusting your search terms or filter selection.</p>
+          </div>
+        ) : (
+          filteredAssignments.map((assignment) => {
             const submission = submissionsMap[assignment.id];
-            const isSubmitted = !!submission;
-            const isGraded = submission?.status === 'evaluated';
+            const isEvaluated = submission?.status === 'evaluated';
             const isNeedsRevision = submission?.status === 'needs_revision';
-            const dueDate = new Date(assignment.due_date);
-            const isPastDue = dueDate < new Date() && !isSubmitted;
+            const isSubmitted = !!submission;
 
             return (
               <div 
-                key={assignment.id} 
-                className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm hover:border-slate-300 transition-all space-y-4"
+                key={assignment.id}
+                className="group glass-panel rounded-2xl p-6 border border-slate-800/80 hover:border-slate-700 hover:shadow-2xl hover:shadow-cyan-500/5 transition-all duration-300 space-y-5"
               >
-                {/* Header & Meta */}
+                {/* Header with Title and Due Date */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  <div className="space-y-1">
+                  <div className="space-y-1.5 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                        Task #{assignment.id}
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700">
+                        LAB-0{assignment.id}
                       </span>
-                      <h2 className="text-base font-semibold text-slate-900">
-                        {assignment.title}
-                      </h2>
+                      <StatusBadge status={submission?.status || 'pending'} />
+                      {isEvaluated && submission.marks !== null && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
+                          <Award className="w-3.5 h-3.5 text-emerald-400" />
+                          {submission.marks} / 100
+                        </span>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-500">
-                      Instructor: <span className="font-medium text-slate-700">{assignment.faculty_name || 'Department Faculty'}</span>
-                    </p>
+                    <h2 className="text-lg font-heading font-bold text-white group-hover:text-cyan-300 transition-colors">
+                      {assignment.title}
+                    </h2>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <StatusBadge status={submission ? submission.status : 'pending'} />
+                  {/* Due Date Badge */}
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 whitespace-nowrap">
+                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Due: {new Date(assignment.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                   </div>
                 </div>
 
-                {/* Description */}
-                <p className="text-xs leading-relaxed text-slate-600 bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/60">
+                {/* Description Body */}
+                <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed font-light">
                   {assignment.description}
                 </p>
 
-                {/* Due Date & Submission Banner */}
-                <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    <span>
-                      Due: <strong className="text-slate-700">{dueDate.toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}</strong>
-                    </span>
-                    {isPastDue && (
-                      <span className="text-red-600 font-semibold text-[11px] ml-1 bg-red-50 px-1.5 py-0.5 rounded border border-red-200">
-                        Overdue
-                      </span>
-                    )}
-                  </div>
-
-                  {submission && (
-                    <div className="text-[11px] text-slate-500">
-                      Submitted on {new Date(submission.submitted_at).toLocaleDateString()}
-                    </div>
-                  )}
-                </div>
-
-                {/* Evaluation Feedback Panel (If Graded or Needs Revision) */}
-                {submission && (isGraded || isNeedsRevision) && (
-                  <div className={`p-4 rounded-xl border text-xs space-y-2 ${
-                    isGraded 
-                      ? 'bg-emerald-50/40 border-emerald-200/70' 
-                      : 'bg-amber-50/40 border-amber-200/80'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Award className={`w-4 h-4 ${isGraded ? 'text-emerald-600' : 'text-amber-600'}`} />
-                        <span className="font-semibold text-slate-800">
-                          {isGraded ? 'Faculty Grade & Evaluation' : 'Revision Required'}
+                {/* Submission & Feedback Status Drawer */}
+                {submission && (
+                  <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <FileText className="w-4 h-4 text-cyan-400" />
+                        <span className="font-mono text-slate-300">
+                          {submission.file_key?.split('/').pop() || 'submission.pdf'}
                         </span>
                       </div>
-                      
-                      {submission.marks !== null && (
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-lg font-bold text-slate-900">
-                            {submission.marks}
-                          </span>
-                          <span className="text-xs text-slate-500 font-medium">/ 100</span>
-                        </div>
-                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleViewPdf(submission)}
+                        disabled={downloadingId === submission.id}
+                        className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>{downloadingId === submission.id ? 'Requesting S3 Presign...' : 'Inspect Uploaded PDF'}</span>
+                      </button>
                     </div>
 
+                    {/* Feedback if available */}
                     {submission.feedback && (
-                      <div className="pt-1.5 border-t border-slate-200/60">
-                        <p className="text-slate-700 italic">
-                          "{submission.feedback}"
-                        </p>
+                      <div className="pt-2 border-t border-slate-800/80 flex items-start gap-2.5 text-xs text-slate-300 bg-slate-950/40 p-3 rounded-lg border border-slate-800/40">
+                        <MessageSquare className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] uppercase tracking-wider font-semibold text-indigo-400">
+                            Faculty Evaluation Notes:
+                          </span>
+                          <p className="italic text-slate-300/90">{submission.feedback}</p>
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Action Row */}
-                <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                  {submission ? (
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleViewPdf(submission)}
-                        disabled={downloadingId === submission.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                        <span>
-                          {downloadingId === submission.id ? 'Generating link...' : 'View Submitted PDF'}
-                        </span>
-                      </button>
+                {/* Action Footer */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
+                  <div className="text-xs text-slate-500 flex items-center gap-1.5">
+                    <span>Instructor:</span>
+                    <span className="text-slate-300 font-medium">{assignment.faculty_name || 'Dr. Aris Thorne'}</span>
+                  </div>
 
-                      {isNeedsRevision && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedAssignment(assignment);
-                            setIsSubmitModalOpen(true);
-                          }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
-                        >
-                          <UploadCloud className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Resubmit Revision</span>
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 ml-auto">
+                  <div className="flex items-center gap-3">
+                    {(!isSubmitted || isNeedsRevision) ? (
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedAssignment(assignment);
                           setIsSubmitModalOpen(true);
                         }}
-                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-sm transition-all"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-white bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 shadow-glow-cyan shadow-sm transition-all duration-300 cursor-pointer"
                       >
                         <UploadCloud className="w-4 h-4" />
-                        <span>Submit Assignment (.pdf)</span>
+                        <span>{isNeedsRevision ? 'Upload Resubmission' : 'Submit Assignment (PDF)'}</span>
                       </button>
-                    </div>
-                  )}
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedAssignment(assignment);
+                          setIsSubmitModalOpen(true);
+                        }}
+                        className="text-xs text-slate-400 hover:text-slate-200 underline underline-offset-4 transition-colors"
+                      >
+                        Upload newer revision
+                      </button>
+                    )}
+                  </div>
                 </div>
 
               </div>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
 
-      {/* S3 Direct Upload Modal */}
-      <SubmitModal
-        isOpen={isSubmitModalOpen}
-        assignment={selectedAssignment}
-        student={student}
-        onClose={() => {
-          setIsSubmitModalOpen(false);
-          setSelectedAssignment(null);
-        }}
-        onSuccess={() => {
-          loadData();
-        }}
-      />
+      {/* S3 Upload Modal */}
+      {isSubmitModalOpen && (
+        <SubmitModal
+          assignment={selectedAssignment}
+          student={student}
+          isOpen={isSubmitModalOpen}
+          onClose={() => setIsSubmitModalOpen(false)}
+          onSuccess={() => {
+            loadData();
+            setIsSubmitModalOpen(false);
+          }}
+        />
+      )}
 
     </div>
   );

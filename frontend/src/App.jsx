@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import StudentDashboard from './components/StudentDashboard';
 import FacultyDashboard from './components/FacultyDashboard';
 import { getUsers, checkBackendHealth } from './api';
-import { Shield, Cloud, Server, Database, KeyRound } from 'lucide-react';
+import { Shield, Cloud, Server, Database, KeyRound, Cpu, CheckCircle2 } from 'lucide-react';
 
 // Fallback seed personas if backend is starting up or in standalone test
 const FALLBACK_USERS = [
@@ -54,7 +54,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#080d1a] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-300">
       
       {/* Sticky Navigation Bar */}
       <Navbar
@@ -67,7 +67,7 @@ export default function App() {
       />
 
       {/* Main View Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {currentRole === 'student' ? (
           <StudentDashboard student={currentUser} />
         ) : (
@@ -75,23 +75,29 @@ export default function App() {
         )}
       </main>
 
-      {/* Cloud Architecture Footer */}
-      <footer className="bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-700">Cloud Architecture:</span>
-            <span>AWS EC2 • RDS MySQL • S3 Pre-signed URLs • SSM Parameter Store</span>
+      {/* Futuristic Cloud Architecture Footer */}
+      <footer className="bg-[#060911]/90 border-t border-slate-800/80 mt-16 py-8 text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="font-heading font-bold text-slate-200 tracking-tight">AssignmentHub Core</span>
+            </div>
+            <span className="hidden sm:inline text-slate-700">•</span>
+            <span className="text-slate-400 font-mono text-[11px]">
+              AWS EC2 Microservices • RDS MySQL 8.0 • Amazon S3 Pre-signed URLs • SSM Parameter Store
+            </span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400">
-            <span className="flex items-center gap-1">
-              <Server className="w-3.5 h-3.5 text-slate-500" /> EC2 IAM Role
+          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] font-mono text-slate-400">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
+              <Server className="w-3.5 h-3.5 text-cyan-400" /> EC2 Instance Role
             </span>
-            <span className="flex items-center gap-1">
-              <KeyRound className="w-3.5 h-3.5 text-slate-500" /> SSM Decryption
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
+              <KeyRound className="w-3.5 h-3.5 text-indigo-400" /> SSM KMS Decryption
             </span>
-            <span className="flex items-center gap-1">
-              <Cloud className="w-3.5 h-3.5 text-slate-500" /> S3 Client v3
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
+              <Cloud className="w-3.5 h-3.5 text-purple-400" /> S3 Client SDK v3
             </span>
           </div>
         </div>
